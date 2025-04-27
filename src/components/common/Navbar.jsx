@@ -1,9 +1,29 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import "./Navbar.css"
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
+import auth from '../../config/firebase'
+import { signOut } from 'firebase/auth'
 function Navbar() {
     const navigate = useNavigate()
+    const [log,setlog] = useState(false)
+
+    useEffect(()=>{
+      auth.onAuthStateChanged(function(user){
+        if(user){
+          setlog(true)
+          console.log("User Logged in")
+        }else{
+          setlog(false)
+          console.log('User Logged Out')
+        }
+
+      })
+    },[])
+
+    function Logout(){
+      signOut(auth)
+    }
 
     
   return (
@@ -13,7 +33,11 @@ function Navbar() {
             <Link className='list-none px-5' to={"/home"}>Home</Link>
             <Link className='list-none px-5' to={"/blogs"}>Blogs</Link>
             <Link className='list-none px-5'>About</Link>
-            <button className='button-style hidden md:block' onClick={()=>navigate("/login")}>Login</button>
+            {
+              log?<button className='button-style hidden md:block' onClick={Logout}>LogOut</button>:<button className='button-style hidden md:block' onClick={()=>navigate("/login")}>Login</button>
+            }
+            
+            
         </div>
     </div>
   )
