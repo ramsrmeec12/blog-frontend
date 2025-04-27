@@ -4,14 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios"
 import Footer from './common/Footer';
 import auth from '../config/firebase';
+
 function Blogs() {
 
     const [blogs, setBlogs] = useState([]);
-    const [admin, setadmin] = useState(false)
+    const [admin, setadmin] = useState(false);
+
+    const backendURL = "https://blog-backend-1-zb7l.onrender.com";
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        axios.get("http://localhost:5000/api/blogs").then((res) => {
+        axios.get(`${backendURL}/api/blogs`).then((res) => {
             console.log(res.data)
             setBlogs(res.data)
         }).catch(() => {
@@ -20,29 +23,24 @@ function Blogs() {
 
         auth.onAuthStateChanged(function(user){
             if(user){
-              if(user.uid=='GJqLZSa4kdTxH0MR5MNL0NTHm3z2'){
-                setadmin(true)
-              }
-            }else{
+                if(user.uid === 'GJqLZSa4kdTxH0MR5MNL0NTHm3z2'){
+                    setadmin(true)
+                }
+            } else {
                 setadmin(false)
             }
-    
-          })
+        })
 
     }, [])
-
-
 
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
 
-
     const handleLike = async (blog_id) => {
         try {
-            const response = await axios.patch(`http://localhost:5000/api/blogs/like/${blog_id}`);
-            // After successfully updating the likes count in the backend, fetch the updated list of blogs
+            const response = await axios.patch(`${backendURL}/api/blogs/like/${blog_id}`);
             if (response.status === 200) {
-                axios.get("http://localhost:5000/api/blogs").then((res) => {
+                axios.get(`${backendURL}/api/blogs`).then((res) => {
                     console.log(res.data)
                     setBlogs(res.data)
                 }).catch(() => {
@@ -55,26 +53,21 @@ function Blogs() {
     };
 
     const handleNewBlogSubmit = (event) => {
-        event.preventDefault(); // Prevent form from refreshing the page
+        event.preventDefault();
         const today = new Date();
         const date = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-
-        const likes = 0
-        axios.post("http://localhost:5000/api/blogs", { newTitle, date, newContent, likes }).then((res) => {
+        const likes = 0;
+        axios.post(`${backendURL}/api/blogs`, { newTitle, date, newContent, likes }).then((res) => {
             console.log(res.data)
 
-            axios.get("http://localhost:5000/api/blogs").then((res) => {
+            axios.get(`${backendURL}/api/blogs`).then((res) => {
                 console.log(res.data)
                 setBlogs(res.data)
             }).catch(() => {
                 console.log("Error fetching data")
             })
-
         });
-
-
-
 
         setNewTitle('');
         setNewContent('');
@@ -82,10 +75,10 @@ function Blogs() {
 
     return (
         <div className="blog-section py-14">
-            <h2 className="text-center text-5xl font-bold mb-14">Latest  <span className='text-orange-400'>Blogs</span> 📚</h2>
+            <h2 className="text-center text-5xl font-bold mb-14">Latest <span className='text-orange-400'>Blogs</span> 📚</h2>
 
             {/* Blog creation form */}
-            {admin?
+            {admin ?
             <div className="blog-creation-form mb-8" style={{ width: "80%", margin: "auto" }}>
                 <form onSubmit={handleNewBlogSubmit} className="flex flex-col gap-4">
                     <input
@@ -108,7 +101,8 @@ function Blogs() {
                         Add Blog
                     </button>
                 </form>
-            </div>:''}
+            </div> : ''
+            }
 
             <div className="blogs-container grid grid-cols-1 md:grid-cols-2 gap-6 container mx-auto px-4">
                 {blogs.map((blog) => (
@@ -127,4 +121,4 @@ function Blogs() {
     );
 }
 
-export default Blogs
+export default Blogs;
